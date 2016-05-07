@@ -1,0 +1,38 @@
+#!/usr/bin/env php
+<?php
+
+use Vault\Application;
+
+// Running as `bin/vault`
+$loader = __DIR__ . '/../vendor/autoload.php';
+
+if (!file_exists($loader)) {
+    // Running as .phar file
+    $loader = __DIR__ . '/../autoload.php';
+}
+
+if (!file_exists($loader)) {
+    // Running as `vendor/bin/vault`
+    $loader = __DIR__ . '/../../../autoload.php';
+}
+
+if (!file_exists($loader)) {
+    die(
+        'You must set up the project dependencies, run the following commands:' . PHP_EOL .
+        'curl -s http://getcomposer.org/installer | php' . PHP_EOL .
+        'php composer.phar install' . PHP_EOL
+    );
+}
+
+$autoLoader = require($loader);
+
+if (class_exists('AutoTune\Tuner')) {
+    \AutoTune\Tuner::init($autoLoader);
+}
+
+$application = new Application($autoLoader);
+$application->add(new \Vault\Command\LsCommand());
+$application->add(new \Vault\Command\CatCommand());
+$application->add(new \Vault\Command\EncryptCommand());
+$application->add(new \Vault\Command\DecryptCommand());
+$application->run();
