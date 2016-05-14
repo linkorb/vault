@@ -60,12 +60,23 @@ class Vault
     
     public function encryptFilename($filename)
     {
-        return trim(base64_encode($this->encrypt($filename)), '=');
+        return trim($this->safeBase64Encode($this->encrypt($filename)), '=');
     }
     
     public function decryptFilename($filename)
     {
-        return $this->decrypt(base64_decode($filename));
+        return $this->decrypt($this->safeBase64Decode($filename));
+    }
+    
+    public function safeBase64Encode($input)
+    {
+        $input = trim($input, '=');
+        return strtr(base64_encode($input), '+/', '-_');
+    }
+
+    public function safeBase64Decode($input)
+    {
+        return base64_decode(strtr($input, '-_', '+/'));
     }
 
     public function encrypt($data)
